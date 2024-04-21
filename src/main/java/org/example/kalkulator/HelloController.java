@@ -15,8 +15,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class HelloController {
+    @FXML
     public Button buttonSave;
+    @FXML
     public Button buttonClear;
+    @FXML
+    public Button buttonMultiply;
+    @FXML
+    public Button buttonDivide;
     @FXML
     private ListView<String> listOfOperations;
     @FXML
@@ -45,14 +51,39 @@ public class HelloController {
 
     @FXML
     private TextField textNumber2;
-
     @FXML
-    void onMinus(ActionEvent event) {
+    void handleCalculation(ActionEvent event) {
+        Button btn = (Button) event.getSource();
+        String id = btn.getId();
+
         try {
             double liczba1 = Double.parseDouble(textNumber1.getText());
             double liczba2 = Double.parseDouble(textNumber2.getText());
-            double wynik = liczba1 - liczba2;
-            labelResult.setText(liczba1 + " - " + liczba2 + " = " + wynik);
+            double wynik = 0;
+            switch(id) {
+                case "buttonMinus":
+                    wynik = liczba1 - liczba2;
+                    labelResult.setText(liczba1 + " - " + liczba2 + " = " + wynik);
+                    break;
+                case "buttonPlus":
+                    wynik = liczba1 + liczba2;
+                    labelResult.setText(liczba1 + " + " + liczba2 + " = " + wynik);
+                    break;
+                case "buttonMultiply":
+                    wynik = liczba1 * liczba2;
+                    labelResult.setText(liczba1 + " * " + liczba2 + " = " + wynik);
+                    break;
+                case "buttonDivide":
+                    wynik = liczba1 / liczba2;
+                    if (liczba2 == 0) {
+                        labelResult.setText("Nie dziel przez zero!");
+                        return;
+                    }
+                    labelResult.setText(liczba1 + " / " + liczba2 + " = " + wynik);
+                    break;
+                default:
+                    // code block
+            }
             listOfOperations.getItems().add(textNumber1.getText() + " - " + textNumber2.getText() + " = " + wynik);
         } catch (NumberFormatException e) {
             labelResult.setText("Błąd konwersji");
@@ -60,30 +91,46 @@ public class HelloController {
     }
 
     @FXML
+    void onMinus(ActionEvent event) {
+        handleCalculation(event);
+    }
+
+    @FXML
     void onPlus(ActionEvent event) {
-        try {
-            double liczba1 = Double.parseDouble(textNumber1.getText());
-            double liczba2 = Double.parseDouble(textNumber2.getText());
-            double wynik = liczba1 + liczba2;
-            labelResult.setText(liczba1 + " + " + liczba2 + " = " + wynik);
-            listOfOperations.getItems().add(textNumber1.getText() + " + " + textNumber2.getText() + " = " + wynik);
-        } catch (NumberFormatException e) {
-            labelResult.setText("Błąd konwersji");
-        }
+        handleCalculation(event);
+    }
+
+    @FXML
+    void onMultiply(ActionEvent event) {
+        handleCalculation(event);
+    }
+
+    @FXML
+    void onDivide(ActionEvent event) {
+        handleCalculation(event);
     }
 
     @FXML
     void onClear(ActionEvent actionEvent) {
         listOfOperations.getItems().clear();
+        labelResult.setText("");
     }
 
     @FXML
     void onSave(ActionEvent actionEvent) {
+        if (listOfOperations.getItems().size() == 0) {
+            labelResult.setText("Brak danych do zapisania");
+            return;
+        }
+
         try {
             FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Plik tekstowy", "*.txt"));
             File file = fileChooser.showSaveDialog(new Stage());
+
             if (file != null) {
-                PrintWriter output = new PrintWriter(file.getAbsolutePath());
+                PrintWriter output = new PrintWriter(file.getAbsolutePath() + ".txt");
                 output.println("Zapisane operacje:");
                 for (String s : listOfOperations.getItems()) {
                     output.println(s);
